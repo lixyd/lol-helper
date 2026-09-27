@@ -610,6 +610,13 @@ class CTkLauncherApp:
                       command=self._open_augments).pack(
             side=tk.RIGHT, padx=(0, Design.S_SM), pady=Design.S_MD)
 
+        ctk.CTkButton(bar, text="打赏", font=Design.font('small'),
+                      width=Design.sc(64), height=Design.sc(30), corner_radius=Design.R_PILL,
+                      fg_color=Design.BG_SEG, hover_color=Design.BG_HOVER,
+                      text_color=Design.TEXT_DIM,
+                      command=self._open_donate).pack(
+            side=tk.RIGHT, padx=(0, Design.S_SM), pady=Design.S_MD)
+
         self._hairline(parent)
 
     # ---------- ① 英雄墙：备战席 10 格，头像 100% ----------
@@ -1132,6 +1139,53 @@ class CTkLauncherApp:
         ("snap_to_client", "吸附客户端右上角",
          "弹出时自动贴到英雄联盟客户端右上角"),
     )
+
+    def _open_donate(self):
+        w = getattr(self, "_donate_win", None)
+        if w is not None and w.winfo_exists():
+            w.deiconify()
+            w.lift()
+            w.focus_force()
+            return
+
+        win = ctk.CTkToplevel(self.root)
+        self._donate_win = win
+        win.title("打赏 · 感谢支持")
+        win.configure(fg_color=Design.BG)
+        win.resizable(False, False)
+        try:
+            win.transient(self.root)
+        except Exception:
+            pass
+        win.geometry(f"{Design.sc(400)}x{Design.sc(480)}"
+                     f"+{self.root.winfo_x() + Design.sc(200)}"
+                     f"+{self.root.winfo_y() + Design.sc(60)}")
+
+        head = ctk.CTkFrame(win, fg_color=Design.BG_BAR, corner_radius=0)
+        head.pack(fill=tk.X)
+        ctk.CTkLabel(head, text="打赏", font=Design.font('brand'),
+                     text_color=Design.TEXT).pack(side=tk.LEFT,
+                                                  padx=Design.S_XL, pady=Design.S_MD)
+        ctk.CTkLabel(head, text="微信扫码 · 感谢支持",
+                     font=Design.font('small'),
+                     text_color=Design.TEXT_MUTE).pack(side=tk.RIGHT,
+                                                       padx=Design.S_XL, pady=Design.S_MD)
+
+        card = ctk.CTkFrame(win, fg_color=Design.BG_CARD, corner_radius=Design.R_LG,
+                            border_width=1, border_color=Design.BORDER)
+        card.pack(fill=tk.BOTH, expand=True, padx=Design.S_LG, pady=Design.S_LG)
+
+        img_path = os.path.join(BASE_DIR, "assets", "donate.jpg")
+        try:
+            img = Image.open(img_path)
+            px = Design.sc(340)
+            self._donate_photo = ctk.CTkImage(light_image=img, dark_image=img,
+                                              size=(px, px))
+            ctk.CTkLabel(card, image=self._donate_photo, text="").pack(pady=Design.sc(18))
+        except Exception as e:
+            ctk.CTkLabel(card, text=f"打赏码加载失败: {e}",
+                         font=Design.font('small'),
+                         text_color=Design.TEXT_MUTE).pack(pady=Design.sc(30))
 
     def _open_settings(self):
         w = self._settings_win
