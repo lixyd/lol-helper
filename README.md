@@ -1,7 +1,10 @@
-# xiaobai助手 · 极简版
+# xiaobai助手 · 极简版 —— 英雄联盟 LOL 极地大乱斗助手工具插件
 
-Windows 本地助手，专注 **极地大乱斗 / 海克斯大乱斗（ARAM Mayhem）**。
+**英雄联盟（League of Legends / LOL）** Windows 本地助手，专注 **极地大乱斗 / 海克斯大乱斗（ARAM Mayhem）**：
+自动接受与开始匹配、备战席抢英雄、海克斯图鉴、对局中自动隐藏并吸附客户端右上角。
 纯官方 LCU 本地 API 驱动 —— **无进程注入、无内存读写、无键鼠模拟、无 OCR**。
+
+> 关键词：英雄联盟助手 · LOL 助手 · LOL 工具 · 大乱斗插件 · 自动接受对局 · 抢英雄工具 · 海克斯图鉴 · ARAM 助手 · LCU API · Riot Games
 
 > 官网 / 功能介绍 / 真机截图：**<https://xiaobaiai.asia/xiaobai-helper/>**
 
