@@ -1,5 +1,5 @@
 """
-xiaobai助手 · 极简版 — 匹配自动化 + 备战席抢英雄 + WeGame 启动
+xiaobai助手 · 极简版 — 匹配自动化 + 备战席抢英雄 + 自动领取奖励 + WeGame 启动
 
 布局（严格按手绘稿，自上而下）：
   ┌ 顶栏 ── 品牌 / 连接状态
@@ -11,12 +11,13 @@ xiaobai助手 · 极简版 — 匹配自动化 + 备战席抢英雄 + WeGame 启
   备战席头像点了就锁定目标，到点自动换，不在界面上提示秒数。
 
 依赖：
-  scripts/config.py         配置持久化
-  scripts/lcu_connector.py  LCU 本地 API（含二进制资源）
-  scripts/matchmaking.py    自动接受/准备/开始
-  scripts/bench_pick.py     备战席提前选取
-  scripts/champ_icons.py    英雄头像（LCU 本地资源优先）
-  scripts/wegame.py         WeGame 定位与启动
+  scripts/config.py          配置持久化
+  scripts/lcu_connector.py   LCU 本地 API（含二进制资源）
+  scripts/matchmaking.py     自动接受/准备/开始
+  scripts/bench_pick.py      备战席提前选取
+  scripts/claim_rewards.py   自动领取奖励（奖励 / 任务 / 事件中心）
+  scripts/champ_icons.py     英雄头像（LCU 本地资源优先）
+  scripts/wegame.py          WeGame 定位与启动
 """
 import tkinter as tk
 from tkinter import messagebox, filedialog
@@ -31,7 +32,7 @@ import datetime
 import traceback
 
 from scripts.config import (
-    BASE_DIR, DATA_DIR, DEFAULT_SETTINGS, AUGMENTS_FILE,
+    BASE_DIR, DATA_DIR, DEFAULT_SETTINGS,
     load_settings, save_settings, normalize_delay,
 )
 os.chdir(BASE_DIR)
@@ -41,9 +42,9 @@ from PIL import Image, ImageDraw, ImageFont
 from scripts.lcu_connector import LCUConnector
 from scripts.matchmaking import MatchmakingService
 from scripts.bench_pick import BenchPickService
+from scripts.claim_rewards import ClaimRewardsService
 from scripts.autoflow import AutoFlowService
 from scripts.champ_icons import ChampIconCache, ICON_PX
-from scripts.augments import AugmentLibrary
 from scripts import wegame
 from scripts import tray as tray_mod
 from scripts import winpos
@@ -407,8 +408,12 @@ class EngineWorker(threading.Thread):
         except Exception:
             pass
 
-        # 自动回到房间 / 自动重连 / 自动接受邀请（开关实时从 settings 读）
+        # 自动回到房间 / 自动重连 / 自动接受邀请 / 自动领取奖励
+        # （开关实时从 settings 读）
         self.autoflow = AutoFlowService(
+            lcu, get_flags=lambda: settings,
+            on_event=lambda m: gui_queue.put({"event": "log", "text": m}))
+        self.claims = ClaimRewardsService(
             lcu, get_flags=lambda: settings,
             on_event=lambda m: gui_queue.put({"event": "log", "text": m}))
 
@@ -420,11 +425,16 @@ class EngineWorker(threading.Thread):
             self.autoflow.stop()
         except Exception:
             pass
+        try:
+            self.claims.stop()
+        except Exception:
+            pass
 
     def run(self):
         self.matchmaking.start()
         self.bench.start()
         self.autoflow.start()
+        self.claims.start()
         while self.running:
             try:
                 connected = self.lcu.is_connected() or bool(self.lcu.connect())
@@ -441,6 +451,10 @@ class EngineWorker(threading.Thread):
         self.bench.stop()
         try:
             self.autoflow.stop()
+        except Exception:
+            pass
+        try:
+            self.claims.stop()
         except Exception:
             pass
 
@@ -470,12 +484,6 @@ class CTkLauncherApp:
         self.lcu = LCUConnector(CHAMPIONS_FILE)
         self.engine = None
         self.engine_running = False
-
-        # 海克斯图鉴（官方离线数据）
-        try:
-            self.augments = AugmentLibrary(AUGMENTS_FILE)
-        except Exception:
-            self.augments = None
 
         # 托盘（ctypes 自建，失败则降级）
         self.tray = None
@@ -603,11 +611,11 @@ class CTkLauncherApp:
                       command=self._open_settings).pack(
             side=tk.RIGHT, padx=(0, Design.S_SM), pady=Design.S_MD)
 
-        ctk.CTkButton(bar, text="海克斯图鉴", font=Design.font('small'),
-                      width=Design.sc(92), height=Design.sc(30), corner_radius=Design.R_PILL,
+        ctk.CTkButton(bar, text="🎁 领取奖励", font=Design.font('small'),
+                      width=Design.sc(104), height=Design.sc(30), corner_radius=Design.R_PILL,
                       fg_color=Design.BG_SEG, hover_color=Design.BG_HOVER,
                       text_color=Design.TEXT_DIM,
-                      command=self._open_augments).pack(
+                      command=self._on_claim_click).pack(
             side=tk.RIGHT, padx=(0, Design.S_SM), pady=Design.S_MD)
 
         ctk.CTkButton(bar, text="打赏", font=Design.font('small'),
@@ -913,6 +921,24 @@ class CTkLauncherApp:
         save_settings(self.settings)
         self._append_log(f"⏱ 自动接受延迟 {self.settings['auto_accept_delay']}s")
 
+    def _on_claim_click(self):
+        """「🎁 领取奖励」：立即手动领取一轮（奖励 / 任务 / 事件中心）。
+
+        引擎开着就用引擎里的服务（共享连接），没开就临时起一个，
+        不依赖自动化开关，也不阻塞界面。
+        """
+        if not self.lcu.is_connected() and not self.lcu.connect():
+            self._append_log("⚠ 未连接客户端，请先登录英雄联盟客户端", "warning")
+            return
+        self._append_log("🔍 正在检查可领取奖励…")
+        svc = None
+        if self.engine and getattr(self.engine, "claims", None):
+            svc = self.engine.claims
+        else:
+            svc = ClaimRewardsService(
+                self.lcu, on_event=lambda m: self._append_log(m))
+        svc.claim_once_async()
+
     # ---------- ③ WeGame（最底部） ----------
 
     def _build_wegame(self, parent):
@@ -1130,6 +1156,8 @@ class CTkLauncherApp:
          "掉线时自动连回正在进行的对局"),
         ("auto_accept_invite", "自动接受房间邀请",
          "好友 / 队友拉你进房时自动同意"),
+        ("auto_claim", "自动领取奖励",
+         "奖励 / 任务 / 事件中心，每 30 秒自动检查并领取"),
         ("autostart", "开机自启",
          "登录 Windows 后自动启动本工具"),
         ("close_to_tray", "关闭时最小化到托盘",
@@ -1291,163 +1319,6 @@ class CTkLauncherApp:
         label = dict((k, t) for k, t, _d in self.SETTING_ROWS).get(key, key)
         self._append_log(f"{'☑' if value else '☐'} {label} "
                          f"{'已开启' if value else '已关闭'}")
-
-    # ---------- 海克斯图鉴 ----------
-
-    RARITY_STYLE = {
-        "棱彩":   ("#F3E8FA", "#7A2FA8"),
-        "黄金":   ("#FFF3DF", "#9A6209"),
-        "白银":   ("#EFEFF2", "#5C5C61"),
-        "事件抉择": ("#E1F4F6", "#0B7285"),
-    }
-    AUG_LIMIT = 80
-
-    def _open_augments(self):
-        w = self._aug_win
-        if w is not None and w.winfo_exists():
-            w.deiconify()
-            w.lift()
-            w.focus_force()
-            return
-        if not self.augments or self.augments.error:
-            msg = (self.augments.error if self.augments else "海克斯数据不可用")
-            self._append_log(f"⚠ {msg}", "warning")
-            return
-
-        win = ctk.CTkToplevel(self.root)
-        self._aug_win = win
-        win.title("海克斯图鉴")
-        win.configure(fg_color=Design.BG)
-        win.geometry(f"{Design.sc(760)}x{Design.sc(560)}"
-                     f"+{max(0, self.root.winfo_x() - Design.sc(60))}"
-                     f"+{self.root.winfo_y() + Design.sc(40)}")
-        try:
-            win.transient(self.root)
-        except Exception:
-            pass
-
-        head = ctk.CTkFrame(win, fg_color=Design.BG_BAR, corner_radius=0)
-        head.pack(fill=tk.X)
-        left = ctk.CTkFrame(head, fg_color="transparent")
-        left.pack(side=tk.LEFT, padx=Design.S_XL, pady=Design.S_MD)
-        ctk.CTkLabel(left, text="海克斯图鉴", font=Design.font('brand'),
-                     text_color=Design.TEXT).pack(side=tk.LEFT)
-        cnt = self.augments.counts()
-        ctk.CTkLabel(left, text=f"· Riot 官方数据 补丁 {self.augments.patch}"
-                                f" · 共 {cnt['total']} 条（大乱斗池 {cnt['aram']}）",
-                     font=Design.font('small'),
-                     text_color=Design.TEXT_MUTE).pack(side=tk.LEFT,
-                                                       padx=(8, 0), pady=(4, 0))
-
-        bar = ctk.CTkFrame(win, fg_color="transparent")
-        bar.pack(fill=tk.X, padx=Design.S_XL, pady=(Design.S_MD, Design.S_SM))
-        self._aug_query = tk.StringVar(value="")
-        entry = ctk.CTkEntry(bar, textvariable=self._aug_query,
-                             placeholder_text="搜索海克斯名称或效果关键词…",
-                             font=Design.font('body'), height=Design.sc(38),
-                             corner_radius=Design.R_SM, fg_color=Design.BG_INPUT,
-                             border_color=Design.BORDER, border_width=1,
-                             text_color=Design.TEXT)
-        entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
-
-        self._aug_rarity = "全部"
-        seg = ctk.CTkSegmentedButton(
-            bar, values=["全部"] + self.augments.rarities(),
-            command=self._on_aug_rarity, fg_color=Design.BG_SEG,
-            selected_color=Design.ACCENT, selected_hover_color=Design.ACCENT_HVR,
-            unselected_color=Design.BG_SEG, unselected_hover_color=Design.BG_HOVER,
-            text_color=Design.TEXT, font=Design.font('small'),
-            height=Design.sc(38), corner_radius=Design.R_SM)
-        seg.set("全部")
-        seg.pack(side=tk.LEFT, padx=(Design.S_SM, 0))
-        self._aug_seg = seg
-
-        opt = ctk.CTkFrame(win, fg_color="transparent")
-        opt.pack(fill=tk.X, padx=Design.S_XL)
-        self._aug_aram_only = tk.BooleanVar(value=True)
-        ctk.CTkSwitch(opt, text="只看大乱斗可用", variable=self._aug_aram_only,
-                      font=Design.font('small'), text_color=Design.TEXT_DIM,
-                      progress_color=Design.ACCENT, button_color=Design.TEXT_INV,
-                      fg_color=Design.LINE, width=Design.sc(42),
-                      command=self._render_augments).pack(side=tk.LEFT)
-        self._aug_count = tk.StringVar(value="")
-        ctk.CTkLabel(opt, textvariable=self._aug_count, font=Design.font('small'),
-                     text_color=Design.TEXT_MUTE).pack(side=tk.RIGHT)
-
-        self._aug_list = ctk.CTkScrollableFrame(win, fg_color="transparent",
-                                                corner_radius=0)
-        self._aug_list.pack(fill=tk.BOTH, expand=True,
-                            padx=Design.S_LG, pady=(Design.S_SM, Design.S_SM))
-
-        entry.bind("<KeyRelease>", self._on_aug_key)
-        win.protocol("WM_DELETE_WINDOW", win.destroy)
-        self._render_augments()
-
-    def _on_aug_key(self, _evt):
-        try:
-            if self._aug_job:
-                self.root.after_cancel(self._aug_job)
-        except Exception:
-            pass
-        self._aug_job = self.root.after(240, self._render_augments)
-
-    def _on_aug_rarity(self, value):
-        self._aug_rarity = value
-        self._render_augments()
-
-    def _render_augments(self):
-        if not self._aug_win or not self._aug_win.winfo_exists():
-            return
-        for w in self._aug_list.winfo_children():
-            w.destroy()
-
-        rarity = "" if self._aug_rarity == "全部" else self._aug_rarity
-        rows = self.augments.search(
-            self._aug_query.get(), rarity,
-            aram_only=bool(self._aug_aram_only.get()))
-        total = len(rows)
-        shown = rows[:self.AUG_LIMIT]
-        self._aug_count.set(f"共 {total} 条" + (f"，显示前 {self.AUG_LIMIT} 条"
-                                              if total > self.AUG_LIMIT else ""))
-
-        if not rows:
-            ctk.CTkLabel(self._aug_list, text="没有匹配的海克斯",
-                         font=Design.font('body'), text_color=Design.TEXT_MUTE).pack(
-                pady=Design.S_XL)
-            return
-
-        for e in shown:
-            card = ctk.CTkFrame(self._aug_list, fg_color=Design.BG_CARD,
-                                corner_radius=Design.R_MD, border_width=1,
-                                border_color=Design.BORDER)
-            card.pack(fill=tk.X, pady=(0, Design.S_SM))
-            line = ctk.CTkFrame(card, fg_color="transparent")
-            line.pack(fill=tk.X, padx=Design.S_MD, pady=(Design.S_MD, 0))
-            ctk.CTkLabel(line, text=e.name, font=Design.font('bodyb'),
-                         text_color=Design.TEXT).pack(side=tk.LEFT)
-            bg, fg = self.RARITY_STYLE.get(e.rarity, ("#EFEFF2", "#5C5C61"))
-            if e.rarity:
-                ctk.CTkLabel(line, text=e.rarity, font=Design.font('micro'),
-                             fg_color=bg, text_color=fg, corner_radius=Design.R_PILL,
-                             height=Design.sc(20)).pack(
-                    side=tk.LEFT, padx=(Design.sc(8), 0))
-            if e.aram_specific:
-                ctk.CTkLabel(line, text="大乱斗专属", font=Design.font('micro'),
-                             fg_color=Design.BG_SEG, text_color=Design.TEXT_DIM,
-                             corner_radius=Design.R_PILL,
-                             height=Design.sc(20)).pack(
-                    side=tk.LEFT, padx=(Design.sc(6), 0))
-
-            if e.has_desc:
-                text = e.desc + ("（数值以游戏内为准）" if e.approx else "")
-                color = Design.TEXT_DIM
-            else:
-                text = "官方暂无中文描述（游戏内可看完整效果）"
-                color = Design.TEXT_MUTE
-            ctk.CTkLabel(card, text=text, font=Design.font('small'),
-                         text_color=color, justify="left", anchor="w",
-                         wraplength=Design.sc(680)).pack(
-                fill=tk.X, padx=Design.S_MD, pady=(Design.sc(4), Design.S_MD))
 
     # ---------- 托盘 ----------
 

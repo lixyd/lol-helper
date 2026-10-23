@@ -99,7 +99,7 @@ def build():
         "--hidden-import", "scripts.winpos",
         "--hidden-import", "scripts.utils",
         "--hidden-import", "scripts.autoflow",
-        "--hidden-import", "scripts.augments",
+        "--hidden-import", "scripts.claim_rewards",
         "--hidden-import", "scripts.tray",
 
         ENTRY_POINT,
@@ -136,8 +136,7 @@ def copy_runtime_files():
 
     dst_data = os.path.join(DIST_DIR, "data")
     os.makedirs(dst_data, exist_ok=True)
-    for name in ("champions.json", "settings.json", "pinyin_map.json",
-                 "augments_official.json", "augment_alias_zh.json"):
+    for name in ("champions.json", "settings.json", "pinyin_map.json"):
         src = os.path.join("data", name)
         if os.path.exists(src):
             shutil.copy2(src, os.path.join(dst_data, name))

@@ -1,10 +1,10 @@
 # xiaobai助手 · 极简版 —— 英雄联盟 LOL 极地大乱斗助手工具插件
 
 **英雄联盟（League of Legends / LOL）** Windows 本地助手，专注 **极地大乱斗 / 海克斯大乱斗（ARAM Mayhem）**：
-自动接受与开始匹配、备战席抢英雄、海克斯图鉴、对局中自动隐藏并吸附客户端右上角。
+自动接受与开始匹配、备战席抢英雄、自动领取奖励、对局中自动隐藏并吸附客户端右上角。
 纯官方 LCU 本地 API 驱动 —— **无进程注入、无内存读写、无键鼠模拟、无 OCR**。
 
-> 关键词：英雄联盟助手 · LOL 助手 · LOL 工具 · 大乱斗插件 · 自动接受对局 · 抢英雄工具 · 海克斯图鉴 · ARAM 助手 · LCU API · Riot Games
+> 关键词：英雄联盟助手 · LOL 助手 · LOL 工具 · 大乱斗插件 · 自动接受对局 · 抢英雄工具 · 自动领取奖励 · ARAM 助手 · LCU API · Riot Games
 
 > 官网 / 功能介绍 / 真机截图：**<https://xiaobaiai.asia/xiaobai-helper/>**
 
@@ -51,14 +51,18 @@
 - 头像来源：LCU 本地官方资源优先，离线走 Data Dragon CDN，均带磁盘缓存
   （`data/icon_cache/`）
 
-### 海克斯图鉴
-右上角「海克斯图鉴」按钮打开。Riot 官方数据（CommunityDragon，随补丁更新）：
+### 自动领取奖励
+右上角「🎁 领取奖励」按钮立即手动领取一轮；也可在设置里开「自动领取奖励」，
+自动化运行中每 30 秒自动检查一轮。三个来源全覆盖，全部走 LCU 本地 API
+（实现与 LeagueAkari claim-tools、Mac 版 xiaobai助手 v0.7.0 同源）：
 
-- 552 条海克斯的中文效果 + 稀有度（白银 / 黄金 / 棱彩）+ 是否属于大乱斗池
-- 支持关键词搜索与稀有度筛选，**离线可用**
-- 官方仅 223/552 条有中文描述，缺的如实标注；官方不提供胜率，图鉴不含胜率数据
+| 来源 | 查询 | 领取 |
+|---|---|---|
+| 奖励（宝箱 / 胶囊 / 图标等） | `GET /lol-rewards/v1/grants?status=PENDING_SELECTION` | `POST /lol-rewards/v1/grants/{id}/select`，多选一按 `maxSelectionsAllowed` 自动勾选 |
+| 任务奖励 | `GET /lol-missions/v1/missions` 筛 `SELECT_REWARDS` | `PUT /lol-missions/v1/player/{id}` |
+| 事件中心 / 通行证奖励轨 | `GET /lol-event-hub/v1/events` 筛 `unclaimedRewardCount > 0` | `POST /lol-event-hub/v1/events/{id}/reward-track/claim-all` 一键全领 |
 
-![海克斯图鉴](docs/ui-augments.png)
+每领一项都有日志；领取失败只播报一次并稍后自动重试，不刷屏。
 
 ### 窗口行为（对局中自动隐藏 + 吸附客户端）
 两个开关都在设置里，默认开启：
@@ -117,6 +121,7 @@ Windows 本机打包：`python build.py` → `dist\build_*\ARAMHelper\`。
 | 自动回到房间 | `POST /lol-lobby/v2/play-again` | |
 | 自动重连 | `POST /lol-gameflow/v1/reconnect` | |
 | 自动接受邀请 | `/lol-lobby/v2/received-invitations/.../accept` | |
+| 自动领取奖励 | `lol-rewards` / `lol-missions` / `lol-event-hub` 三类 | 30s 节流，实现对齐 LeagueAkari claim-tools |
 | 自动显隐 | 三态机 `ignore/show/hide` | 对齐 LA `_watchAuxWindow` |
 | 贴客户端 | `FindWindow("RCLIENT")` + workArea 夹取 | 对齐 LA `qS/WS/GS` |
 
@@ -127,8 +132,8 @@ ctk_launcher.py            主界面（Design 设计系统 / 自动显隐 / 吸�
 scripts/lcu_connector.py   LCU 连接与本地资源
 scripts/matchmaking.py     接受 / 准备 / 开始
 scripts/bench_pick.py      备战席抢英雄
+scripts/claim_rewards.py   自动领取奖励（奖励 / 任务 / 事件中心）
 scripts/champ_icons.py     英雄头像（LCU 优先 + CDN + 磁盘缓存）
-scripts/augments.py        海克斯图鉴（官方离线数据）
 scripts/winpos.py          贴客户端定位（LA 算法复刻）
 scripts/tray.py            托盘 + 开机自启（ctypes 零依赖）
 scripts/wegame.py          WeGame 定位与启动
@@ -139,13 +144,11 @@ scripts/config.py          配置持久化
 
 | 用途 | 文件 | 来源 |
 |---|---|---|
-| 海克斯图鉴 | `data/augments_official.json` | Riot / Community Dragon（随补丁更新） |
-| 海克斯别名 | `data/augment_alias_zh.json` | 同上 |
 | 英雄表 | `data/champions.json` | LCU 本地 |
 | 拼音映射 | `data/pinyin_map.json` | 内置 |
 | 设置 | `data/settings.json` | 本机生成 |
 
-旧版的海克斯 OCR 推荐与符文系统**已移除**（历史版本见 git 历史）。
+旧版的海克斯 OCR 推荐、符文系统与海克斯图鉴**已移除**（历史版本见 git 历史）。
 
 ## 声明
 

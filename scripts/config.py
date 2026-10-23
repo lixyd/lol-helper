@@ -43,11 +43,6 @@ def lower_process_priority():
 # 数据文件路径常量
 CHAMPION_ID_FILE = os.path.join(DATA_DIR, "champions.json")
 PINYIN_FILE      = os.path.join(DATA_DIR, "pinyin_map.json")
-CSV_FILE         = os.path.join(DATA_DIR, "hero_augments.csv")
-
-# 官方海克斯数据库（由 scripts/build_augments_official.py 生成，CommunityDragon 官方数据）
-AUGMENTS_FILE    = os.path.join(DATA_DIR, "augments_official.json")
-AUGMENT_ALIAS_FILE = os.path.join(DATA_DIR, "augment_alias_zh.json")
 
 # 扩展功能数据
 SETTINGS_FILE   = os.path.join(DATA_DIR, "settings.json")
@@ -58,7 +53,7 @@ HEX_LEVEL_CHECKPOINTS = (1, 7, 11, 15)
 # 自动接受可选延迟（秒）——按手绘稿固定 1 / 3 / 5
 AUTO_DELAY_CHOICES = (1, 3, 5)
 
-# 默认开关（纯净版：仅匹配自动化 + 备战席抢英雄 + WeGame 启动）
+# 默认开关（纯净版：匹配自动化 + 备战席抢英雄 + 自动领取奖励 + WeGame 启动）
 DEFAULT_SETTINGS = {
     "auto_accept": True,
     "auto_ready": True,
@@ -73,6 +68,8 @@ DEFAULT_SETTINGS = {
     "auto_reconnect": True,
     # 自动接受房间邀请（组队被拉）
     "auto_accept_invite": False,
+    # 自动领取奖励：lol-rewards / lol-missions / lol-event-hub 三类来源，30s 节流
+    "auto_claim": True,
     # 开机自启（写 HKCU\...\Run）
     "autostart": False,
     # 点关闭时最小化到托盘而不是退出

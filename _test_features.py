@@ -1,8 +1,9 @@
 """
 本轮新功能回归（全部用桩，不需要真实客户端）：
   A. AutoFlowService：自动重连 / 自动回到房间 / 自动接受邀请（含冷却、去重、开关实时生效）
-  B. AugmentLibrary：官方海克斯数据加载、搜索、稀有度过滤、描述清洗
-  C. 开机自启：注册表写入 / 读取 / 删除（用临时子键，不污染 Run 键）
+  B. 开机自启：注册表写入 / 读取 / 删除（用临时子键，不污染 Run 键）
+
+自动领取奖励的回归见 _test_claim_rewards.py。
 
 运行： python _test_features.py
 """
@@ -15,8 +16,6 @@ sys.path.insert(0, BASE)
 os.chdir(BASE)
 
 from scripts.autoflow import AutoFlowService
-from scripts.augments import AugmentLibrary, clean_desc
-from scripts.config import AUGMENTS_FILE
 from scripts import tray as tray_mod
 
 PASS = []
@@ -115,46 +114,9 @@ def test_autoflow():
     check("客户端未连接时不动作", lcu7.calls == [])
 
 
-# ============================================================ B. Augments
-def test_augments():
-    print("[B] AugmentLibrary")
-    lib = AugmentLibrary(AUGMENTS_FILE)
-    check("数据文件可加载", lib.error == "" and len(lib.entries) > 500)
-
-    cnt = lib.counts()
-    check("ARAM 池筛选可用", 0 < cnt["aram"] < cnt["total"])
-
-    aram = lib.search(aram_only=True)
-    check("默认只看 ARAM 池", all(e.aram for e in aram) and len(aram) == cnt["aram"])
-
-    allrows = lib.search(aram_only=False)
-    check("取消 ARAM 过滤后条目更多", len(allrows) == cnt["total"])
-
-    hit = lib.search("物理转魔法", aram_only=False)
-    check("按中文名搜索命中", any(e.name == "物理转魔法" for e in hit))
-
-    desc_hit = lib.search("法术强度", aram_only=False)
-    check("按效果关键词搜索命中", len(desc_hit) > 0)
-
-    silver = lib.search(rarity="白银", aram_only=False)
-    check("按稀有度过滤", silver and all(e.rarity == "白银" for e in silver))
-
-    check("排序为 棱彩→黄金→白银",
-          [e.rarity for e in allrows[:3]] == ["棱彩", "棱彩", "棱彩"])
-
-    d, approx = clean_desc("获得@APAmp*100@%法术强度。剩余%i:cooldown%冷却")
-    check("清理动态占位符", "@" not in d and "%i:" not in d and approx)
-
-    d2, approx2 = clean_desc("你的治疗和护盾会变强。")
-    check("普通描述不受影响", d2 == "你的治疗和护盾会变强。" and not approx2)
-
-    nod = [e for e in allrows if not e.has_desc]
-    check("缺描述条目如实标注（不编造）", len(nod) > 0)
-
-
-# ============================================================ C. 自启
+# ============================================================ B. 自启
 def test_autostart():
-    print("[C] 开机自启（临时子键）")
+    print("[B] 开机自启（临时子键）")
     test_key = r"Software\xiaobaiHelperTest"
     name = "testEntry"
     ok = tray_mod.set_autostart(True, target='"C:\\fake\\app.exe"',
@@ -174,7 +136,6 @@ def test_autostart():
 if __name__ == "__main__":
     t0 = time.time()
     test_autoflow()
-    test_augments()
     test_autostart()
     bad = [n for n, ok in PASS if not ok]
     print(f"\n{'=' * 46}")
