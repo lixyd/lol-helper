@@ -596,30 +596,32 @@ class CTkLauncherApp:
                      text_color=Design.TEXT_MUTE).pack(side=tk.LEFT, padx=(8, 0),
                                                        pady=(4, 0))
 
+        # 顶栏右侧四个控件（状态 / 设置 / 领取奖励 / 打赏）：
+        # 统一高度 Design.sc(36) + 统一 body 字号，整体比旧版（高30）加大一号
         pill = ctk.CTkFrame(bar, fg_color=Design.BG_SEG, corner_radius=Design.R_PILL,
                             border_width=1, border_color=Design.BORDER)
         pill.pack(side=tk.RIGHT, padx=(0, Design.S_XL), pady=Design.S_MD)
-        self.conn_dot = ctk.CTkLabel(pill, text="● 未连接", font=Design.font('small'),
+        self.conn_dot = ctk.CTkLabel(pill, text="● 未连接", font=Design.font('body'),
                                      text_color=Design.TEXT_DIM)
-        self.conn_dot.pack(padx=Design.sc(13), pady=Design.sc(6))
+        self.conn_dot.pack(padx=Design.sc(14), pady=Design.sc(8))
 
-        ctk.CTkButton(bar, text="⚙", font=Design.font('body'),
-                      width=Design.sc(34), height=Design.sc(30),
+        ctk.CTkButton(bar, text="⚙ 设置", font=Design.font('body'),
+                      width=Design.sc(88), height=Design.sc(36),
                       corner_radius=Design.R_PILL,
                       fg_color=Design.BG_SEG, hover_color=Design.BG_HOVER,
                       text_color=Design.TEXT_DIM,
                       command=self._open_settings).pack(
             side=tk.RIGHT, padx=(0, Design.S_SM), pady=Design.S_MD)
 
-        ctk.CTkButton(bar, text="🎁 领取奖励", font=Design.font('small'),
-                      width=Design.sc(104), height=Design.sc(30), corner_radius=Design.R_PILL,
+        ctk.CTkButton(bar, text="🎁 领取奖励", font=Design.font('body'),
+                      width=Design.sc(124), height=Design.sc(36), corner_radius=Design.R_PILL,
                       fg_color=Design.BG_SEG, hover_color=Design.BG_HOVER,
                       text_color=Design.TEXT_DIM,
                       command=self._on_claim_click).pack(
             side=tk.RIGHT, padx=(0, Design.S_SM), pady=Design.S_MD)
 
-        ctk.CTkButton(bar, text="打赏", font=Design.font('small'),
-                      width=Design.sc(64), height=Design.sc(30), corner_radius=Design.R_PILL,
+        ctk.CTkButton(bar, text="打赏", font=Design.font('body'),
+                      width=Design.sc(88), height=Design.sc(36), corner_radius=Design.R_PILL,
                       fg_color=Design.BG_SEG, hover_color=Design.BG_HOVER,
                       text_color=Design.TEXT_DIM,
                       command=self._open_donate).pack(
