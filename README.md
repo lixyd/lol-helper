@@ -1,5 +1,15 @@
 # xiaobai助手
 
+League of Legends ARAM assistant for Windows and macOS. Source for both is in this repo.
+
+It accepts the queue, starts matchmaking, reconnects, returns to the lobby, claims rewards, and swaps champions on the bench. It only calls the official local LCU API. It does not inject, read memory, simulate input, or use OCR.
+
+Current builds: Windows [v2.1.0](https://github.com/lixyd/lol-helper/releases/latest) and macOS [v0.8.0](https://github.com/lixyd/lol-mac-helper/releases/latest). The Mac app is ad-hoc signed, not notarized: right-click, then Open, the first time. Apple Silicon only.
+
+Site: <https://xiaobainsj.ccwu.cc/xiaobai-helper/>
+
+## 中文
+
 英雄联盟极地大乱斗 / 海克斯大乱斗的本地助手。Windows 和 macOS 的源码都在这个仓库。
 
 官网：<https://xiaobainsj.ccwu.cc/xiaobai-helper/>
@@ -15,10 +25,10 @@ Windows 这张图是较早的窗口。顶栏上的「海克斯图鉴」已经从
 | | Windows | macOS |
 |---|---|---|
 | 源码 | 仓库根目录，Python | [`macos/`](macos/) ，Swift |
-| 安装包 | [本仓库 Releases](https://github.com/lixyd/lol-helper/releases/latest) 的 `xiaobai-helper-windows.zip`，解压后管理员运行 `ARAMHelper.exe` | [lol-mac-helper Releases](https://github.com/lixyd/lol-mac-helper/releases/latest) 的 zip。最新安装包是 v0.6.0 |
+| 安装包 | [本仓库 Releases](https://github.com/lixyd/lol-helper/releases/latest) 的 `xiaobai-helper-windows.zip`，解压后管理员运行 `ARAMHelper.exe`。当前是 v2.1.0 | [lol-mac-helper Releases](https://github.com/lixyd/lol-mac-helper/releases/latest) 的 zip。当前是 v0.8.0。仅 Apple Silicon，未公证，首次右键 → 打开 |
 | 只这一边有的 | 对局中自动隐藏并吸附客户端右上角、托盘、开机自启、WeGame 一键启动 | 一键启动游戏、窗口贴在客户端右侧。不需要辅助功能权限 |
 
-macOS 源码里还有自动领取奖励，以及对局开始隐藏、结束弹出。这两项还没打进 v0.6.0 安装包，要用的话在 `macos/` 里自己构建。
+macOS v0.8.0 安装包已包含自动领取，以及对局开始隐藏、结束弹出。
 
 ## 从源码运行
 
@@ -51,7 +61,7 @@ cd lol-helper/macos
 
 ## 领取奖励
 
-Windows 源码，以及 macOS 源码（未进 v0.6.0 安装包），都会扫这三处：
+Windows 与 macOS 都会扫这三处：
 
 | 来源 | 查询 | 领取 |
 |---|---|---|
