@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>xiaobai助手</title>
+<meta name="description" content="英雄联盟大乱斗的本地助手。Windows 与 Mac 安装包，只调用本机官方客户端接口。">
+<meta property="og:title" content="xiaobai助手">
+<meta property="og:description" content="英雄联盟大乱斗的本地助手。Windows v2.1.0 与 Mac v0.8.0。">
+<meta property="og:type" content="website">
+<meta property="og:image" content="cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0f1626">
+<meta name="color-scheme" content="dark">
+<style>
+:root {
+  --bg: #0f1626;
+  --ink: #e6edf7;
+  --muted: #a9b6cc;
+  --line: #2a3a56;
+  --btn: #2f6fed;
+  --btn-ink: #fff;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 1rem; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 18px/1.55 -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+a { color: inherit; }
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+.skip {
+  position: absolute;
+  left: 1rem;
+  top: 0;
+  transform: translateY(-120%);
+  background: var(--ink);
+  color: var(--bg);
+  padding: 0.4rem 0.7rem;
+}
+.skip:focus { transform: none; }
+.wrap { width: min(880px, calc(100% - 2rem)); margin: 0 auto; }
+header { padding: 1.25rem 0 0; }
+.name { margin: 0; font-size: 0.95rem; font-weight: 650; letter-spacing: 0.01em; }
+main { padding: 2.5rem 0 3rem; }
+h1 { margin: 0; font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 650; line-height: 1.05; letter-spacing: -0.03em; }
+.lead { margin: 1rem 0 0; max-width: 36rem; color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 1.5rem 0 0; }
+.btn {
+  display: inline-block;
+  background: var(--btn);
+  color: var(--btn-ink);
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-weight: 650;
+}
+.btn.quiet {
+  background: transparent;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.note { margin: 1rem 0 0; color: var(--muted); font-size: 0.95rem; }
+figure { margin: 2rem 0 0; }
+img { width: 100%; height: auto; border-radius: 10px; background: #fff; }
+figcaption { margin-top: 0.6rem; color: var(--muted); font-size: 0.92rem; }
+footer { border-top: 1px solid var(--line); padding: 1.25rem 0 2rem; color: var(--muted); font-size: 0.92rem; }
+footer a { color: var(--ink); }
+@media (max-width: 640px) {
+  .actions { display: grid; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到内容</a>
+<header class="wrap"><p class="name">xiaobai助手</p></header>
+<main class="wrap" id="main">
+  <h1>xiaobai助手</h1>
+  <p class="lead">英雄联盟大乱斗的本地助手。下载后在自己的电脑上运行，只连接本机客户端。</p>
+  <div class="actions">
+    <a class="btn" href="https://gitee.com/leexkun/lol-helper/releases/download/v2.1.0/xiaobai-helper-windows.zip">下载 Windows 版</a>
+    <a class="btn" href="https://gitee.com/leexkun/lol-helper/releases/download/v2.1.0/xiaobai-helper-mac.zip">下载 Mac 版</a>
+    <a class="btn quiet" href="https://gitee.com/leexkun/lol-helper">源码</a>
+  </div>
+  <p class="note">Windows v2.1.0，解压后用管理员运行 ARAMHelper.exe。Mac v0.8.0，只支持 Apple Silicon，第一次请右键再打开。</p>
+  <figure>
+    <img src="cover.png" alt="左边是 Windows 上的 xiaobai助手窗口，备战席有十个英雄头像，下面是启动自动化、自动开始和自动接受。右边是 Mac 窗口贴在客户端右侧。" width="1400" height="788">
+    <figcaption>Windows 这张图较早，顶栏里的海克斯图鉴已经从当前版本去掉。Mac 窗口贴在客户端右侧。</figcaption>
+  </figure>
+</main>
+<footer>
+  <p class="wrap">自动接受、开始匹配、重连、回房间、领奖励、备战席换英雄。与 Riot Games、腾讯无关。源码也在 <a href="https://github.com/lixyd/lol-helper">GitHub</a>。</p>
+</footer>
+</body>
+</html>
