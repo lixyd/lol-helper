@@ -3,98 +3,253 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>xiaobai助手</title>
-<meta name="description" content="英雄联盟大乱斗的本地助手。Windows 与 Mac 安装包，只调用本机官方客户端接口。">
+<title>xiaobai助手 · 英雄联盟大乱斗</title>
+<meta name="description" content="英雄联盟大乱斗的本地助手。Windows v2.1.0 与 Mac v0.8.0，只调用本机官方客户端接口。安装包在 Gitee。">
 <meta property="og:title" content="xiaobai助手">
-<meta property="og:description" content="英雄联盟大乱斗的本地助手。Windows v2.1.0 与 Mac v0.8.0。">
+<meta property="og:description" content="英雄联盟大乱斗的本地助手。Windows v2.1.0 与 Mac v0.8.0。安装包在 Gitee。">
 <meta property="og:type" content="website">
 <meta property="og:image" content="cover.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0f1626">
 <meta name="color-scheme" content="dark">
 <style>
-:root {
-  --bg: #0f1626;
-  --ink: #e6edf7;
-  --muted: #a9b6cc;
-  --line: #2a3a56;
-  --btn: #2f6fed;
-  --btn-ink: #fff;
-}
-* { box-sizing: border-box; }
-html { scroll-padding-top: 1rem; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font: 18px/1.55 -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-}
-a { color: inherit; }
-a:focus-visible, button:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 3px;
-}
-.skip {
-  position: absolute;
-  left: 1rem;
-  top: 0;
-  transform: translateY(-120%);
-  background: var(--ink);
-  color: var(--bg);
-  padding: 0.4rem 0.7rem;
-}
-.skip:focus { transform: none; }
-.wrap { width: min(880px, calc(100% - 2rem)); margin: 0 auto; }
-header { padding: 1.25rem 0 0; }
-.name { margin: 0; font-size: 0.95rem; font-weight: 650; letter-spacing: 0.01em; }
-main { padding: 2.5rem 0 3rem; }
-h1 { margin: 0; font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 650; line-height: 1.05; letter-spacing: -0.03em; }
-.lead { margin: 1rem 0 0; max-width: 36rem; color: var(--muted); }
-.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 1.5rem 0 0; }
-.btn {
-  display: inline-block;
-  background: var(--btn);
-  color: var(--btn-ink);
-  text-decoration: none;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  font-weight: 650;
-}
-.btn.quiet {
-  background: transparent;
-  color: var(--ink);
-  box-shadow: inset 0 0 0 1px var(--line);
-}
-.note { margin: 1rem 0 0; color: var(--muted); font-size: 0.95rem; }
-figure { margin: 2rem 0 0; }
-img { width: 100%; height: auto; border-radius: 10px; background: #fff; }
-figcaption { margin-top: 0.6rem; color: var(--muted); font-size: 0.92rem; }
-footer { border-top: 1px solid var(--line); padding: 1.25rem 0 2rem; color: var(--muted); font-size: 0.92rem; }
-footer a { color: var(--ink); }
-@media (max-width: 640px) {
-  .actions { display: grid; }
-}
+:root{--bg:#0f1626;--bg2:#16213a;--panel:rgba(24,35,58,.78);--line:rgba(150,200,255,.18);--line2:rgba(0,240,255,.35);--tx:#e6edf7;--mut:#a9b6cc;--cy:#00f0ff;--gr:#39ff88;--vi:#8b5cf6;
+--sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
+--mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"JetBrains Mono","Liberation Mono",monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scrollbar-gutter:stable;scroll-behavior:smooth;scroll-padding-top:80px}
+body{background:var(--bg);color:var(--tx);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+::selection{background:var(--cy);color:#000}
+.bg{position:fixed;inset:0;z-index:-3;pointer-events:none;
+ background:radial-gradient(70vw 55vh at 50% -5%,rgba(0,240,255,.2),transparent 65%),radial-gradient(60vw 50vh at 12% 0%,rgba(139,92,246,.24),transparent 60%),radial-gradient(50vw 50vh at 100% 30%,rgba(0,240,255,.12),transparent 60%),radial-gradient(60vw 60vh at 40% 110%,rgba(57,255,136,.08),transparent 60%),linear-gradient(180deg,var(--bg2),var(--bg) 70%)}
+.bg::before{content:"";position:absolute;inset:-2px;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:56px 56px;
+ -webkit-mask:radial-gradient(ellipse 80% 70% at 50% 30%,#000 30%,transparent 80%);mask:radial-gradient(ellipse 80% 70% at 50% 30%,#000 30%,transparent 80%);animation:grid 24s linear infinite}
+@keyframes grid{to{background-position:0 56px,56px 0}}
+.bg::after{content:"";position:absolute;inset:0;opacity:.09;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.scan{position:fixed;inset:0;z-index:-2;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.022) 0 1px,transparent 1px 3px)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+.skip{position:absolute;left:16px;top:0;transform:translateY(-120%);background:var(--cy);color:#001014;padding:6px 10px;z-index:80;font-family:var(--mono)}
+.skip:focus{transform:none}
+a:focus-visible{outline:2px solid var(--cy);outline-offset:3px}
+.top{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);background:rgba(15,22,38,.72);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:20px;height:62px}
+.who{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:14px}
+.mark{width:34px;height:34px;border-radius:9px;border:1px solid var(--line2);box-shadow:0 0 16px rgba(0,240,255,.25);display:grid;place-items:center;color:var(--cy);font-weight:700;font-size:12px}
+.who b{color:var(--cy);font-weight:600}
+.who small{color:var(--mut);font-weight:400}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--gr);box-shadow:0 0 10px var(--gr);animation:blink 2s infinite}
+@keyframes blink{50%{opacity:.3}}
+.tabs{display:flex;gap:4px;margin-left:auto;font-family:var(--mono);font-size:12.5px}
+.tabs a{padding:6px 10px;border-radius:6px;color:var(--mut);transition:.2s}
+.tabs a:hover,.tabs a.cur{color:var(--cy);background:rgba(0,240,255,.08)}
+.tabs a.cur::before{content:"> "}
+.hero{padding:72px 0 28px;position:relative}
+.hud{font-family:var(--mono);font-size:12px;color:var(--mut);display:flex;flex-wrap:wrap;gap:8px 18px;margin-bottom:26px}
+.hud span::before{content:"";display:inline-block;width:6px;height:6px;margin-right:8px;background:var(--cy);box-shadow:0 0 8px var(--cy);vertical-align:middle}
+.hud span:nth-child(2)::before{background:var(--gr);box-shadow:0 0 8px var(--gr)}
+.hud span:nth-child(3)::before{background:var(--vi);box-shadow:0 0 8px var(--vi)}
+h1.slogan{font-size:clamp(36px,5.4vw,68px);line-height:1.08;font-weight:800;letter-spacing:-.02em;
+ background:linear-gradient(100deg,#fff 0%,#c9d2ff 35%,var(--cy) 60%,var(--gr) 85%);-webkit-background-clip:text;background-clip:text;color:transparent;
+ filter:drop-shadow(0 0 30px rgba(0,240,255,.18))}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:28px;align-items:end;margin-top:28px}
+.hero-left{display:flex;flex-direction:column;gap:16px}
+.lead{color:var(--mut);font-size:15.5px;max-width:62ch}
+.lead b{color:var(--tx)}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{font-family:var(--mono);font-size:12px;padding:6px 11px;border:1px solid var(--line);border-radius:999px;color:#d3dcec;background:rgba(255,255,255,.02)}
+.tag.hl{border-color:var(--line2);color:var(--cy);box-shadow:0 0 18px -4px rgba(0,240,255,.5)}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;font-family:var(--mono);font-size:13.5px;font-weight:700;border:1px solid transparent;transition:transform .2s,box-shadow .2s,border-color .2s,color .2s;line-height:1.2}
+.btn.pri{color:#001014;background:linear-gradient(90deg,var(--cy),var(--gr));box-shadow:0 0 24px -6px rgba(0,240,255,.6)}
+.btn.pri:hover{transform:translateY(-2px);box-shadow:0 0 32px -4px rgba(0,240,255,.8)}
+.btn.gho{color:var(--tx);background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.btn.gho:hover{border-color:var(--cy);color:var(--cy)}
+.term{border:1px solid var(--line);border-radius:14px;background:rgba(18,27,46,.9);font-family:var(--mono);font-size:13px;overflow:hidden;box-shadow:0 20px 60px -20px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,255,255,.02)}
+.term .bar{display:flex;gap:6px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);color:var(--mut);font-size:11.5px}
+.term .bar i{width:10px;height:10px;border-radius:50%;background:#ff5f57}
+.term .bar i:nth-child(2){background:#febc2e}
+.term .bar i:nth-child(3){background:#28c840;margin-right:8px}
+.term .clock{margin-left:auto;color:var(--cy);font-variant-numeric:tabular-nums}
+.term pre{padding:16px 18px;white-space:pre-wrap;color:#dbe4f3;font:inherit;font-size:12.5px;line-height:1.75}
+.term .p{color:var(--gr)}.term .k{color:var(--cy)}.term .v{color:#fff}
+.cursor{display:inline-block;width:8px;height:14px;background:var(--cy);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+.sec{padding:30px 0}
+.sh{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+.sh .idx{font-family:var(--mono);color:var(--cy);font-size:13px}
+.sh h2{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.01em}
+.sh h2 span{color:var(--cy)}
+.sh .desc{width:100%;color:var(--mut);font-size:14px;font-family:var(--mono)}
+.stack>*+*{margin-top:16px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{position:relative;display:flex;flex-direction:column;border-radius:18px;overflow:hidden;border:1px solid var(--line);
+ background:linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.05)),rgba(24,35,58,.72);transition:border-color .25s,box-shadow .25s}
+.card:hover{border-color:var(--line2);box-shadow:0 24px 60px -24px color-mix(in srgb,var(--ac,var(--cy)) 55%,transparent)}
+.card .bd{padding:18px 20px 20px;display:flex;flex-direction:column;gap:8px}
+.card .cat{font-family:var(--mono);font-size:11.5px;color:var(--ac,var(--cy));letter-spacing:.02em}
+.card h3{font-size:18px;font-weight:700}
+.card p{color:#bcc7da;font-size:14px}
+.media{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--panel)}
+.media img{width:100%;height:auto;background:#0b1222}
+.media figcaption{padding:10px 14px;font-family:var(--mono);font-size:12px;color:var(--mut);border-top:1px solid var(--line)}
+.panel{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.05)),rgba(24,35,58,.72);overflow:hidden}
+.prose{padding:22px 26px;font-size:14.8px;color:#d3dcec;line-height:1.85}
+ol.steps{list-style:none;counter-reset:st}
+ol.steps>li{counter-increment:st;position:relative;padding:0 0 18px 46px}
+ol.steps>li::before{content:counter(st,decimal-leading-zero);position:absolute;left:0;top:0;width:30px;height:30px;display:grid;place-items:center;border-radius:8px;font-family:var(--mono);font-size:12px;font-weight:700;color:#001014;background:linear-gradient(135deg,var(--cy),var(--gr));box-shadow:0 0 16px -4px rgba(0,240,255,.7)}
+ol.steps>li::after{content:"";position:absolute;left:14.5px;top:34px;bottom:4px;width:1px;background:linear-gradient(var(--line2),transparent)}
+ol.steps>li:last-child{padding-bottom:0}
+ol.steps>li:last-child::after{display:none}
+.steps h3{font-size:16px;margin:2px 0 4px;color:#fff}
+.steps p{color:#bcc7da}
+.callout{margin-top:18px;border:1px dashed rgba(0,240,255,.45);background:rgba(0,240,255,.06);border-radius:12px;padding:14px 18px;color:#d3dcec}
+.faq{padding:18px 20px}
+.faq .q,.faq .a{display:flex;gap:10px}
+.faq .q{font-weight:700;color:#fff}
+.faq .a{color:#bcc7da;font-size:14px;margin-top:8px}
+.faq .q::before,.faq .a::before{font-family:var(--mono);border-radius:5px;height:20px;line-height:20px;font-size:12px;flex:none;margin-top:2px;padding:0 6px}
+.faq .q::before{content:"Q";color:#001014;background:var(--cy)}
+.faq .a::before{content:"A";color:var(--gr);border:1px solid rgba(57,255,136,.5)}
+.cta{padding:34px 28px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;background:radial-gradient(80% 120% at 50% 0%,rgba(0,240,255,.12),transparent 60%),var(--panel)}
+.cta h2{font-size:clamp(22px,3vw,30px)}
+.cta p{color:var(--mut)}
+footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--mut);font-size:13px;font-family:var(--mono)}
+footer a{color:var(--cy)}
+footer .legal{margin-top:8px;font-size:11.5px}
+@media (max-width:960px){.hero-grid,.g2,.g3{grid-template-columns:1fr}.who small{display:none}.hero{padding-top:44px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <a class="skip" href="#main">跳到内容</a>
-<header class="wrap"><p class="name">xiaobai助手</p></header>
-<main class="wrap" id="main">
-  <h1>xiaobai助手</h1>
-  <p class="lead">英雄联盟大乱斗的本地助手。下载后在自己的电脑上运行，只连接本机客户端。</p>
-  <div class="actions">
-    <a class="btn" href="https://gitee.com/leexkun/lol-helper/releases/download/v2.1.0/xiaobai-helper-windows.zip">下载 Windows 版</a>
-    <a class="btn" href="https://gitee.com/leexkun/lol-helper/releases/download/v2.1.0/xiaobai-helper-mac.zip">下载 Mac 版</a>
-    <a class="btn quiet" href="https://gitee.com/leexkun/lol-helper">源码</a>
+<div class="bg" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+<header class="top">
+  <div class="wrap">
+    <a class="who" href="#main"><span class="mark" aria-hidden="true">xb</span><span><b>xiaobai</b> <small>~/lol-helper</small></span><i class="dot" aria-hidden="true"></i></a>
+    <nav class="tabs" aria-label="本页">
+      <a class="cur" href="#main" aria-current="page">助手</a>
+      <a href="#ui">界面</a>
+      <a href="#features">能力</a>
+      <a href="#howto">上手</a>
+      <a href="https://gitee.com/leexkun/lol-helper">源码</a>
+    </nav>
   </div>
-  <p class="note">Windows v2.1.0，解压后用管理员运行 ARAMHelper.exe。Mac v0.8.0，只支持 Apple Silicon，第一次请右键再打开。</p>
-  <figure>
-    <img src="cover.png" alt="左边是 Windows 上的 xiaobai助手窗口，备战席有十个英雄头像，下面是启动自动化、自动开始和自动接受。右边是 Mac 窗口贴在客户端右侧。" width="1400" height="788">
-    <figcaption>Windows 这张图较早，顶栏里的海克斯图鉴已经从当前版本去掉。Mac 窗口贴在客户端右侧。</figcaption>
-  </figure>
+</header>
+<main id="main">
+<section class="hero">
+  <div class="wrap">
+    <div class="hud"><span>// xiaobai助手</span><span>LCU · ARAM</span><span>GITEE RELEASE v2.1.0</span></div>
+    <div class="hero-grid">
+      <div class="hero-left">
+        <h1 class="slogan">xiaobai助手</h1>
+        <p class="lead">英雄联盟大乱斗的本地助手。在自己的电脑上运行，<b>只连接本机客户端</b>。安装包放在 Gitee，不经过 GitHub。</p>
+        <div class="tags"><span class="tag hl">自动接受 · 开始匹配</span><span class="tag">备战席换英雄</span><span class="tag">重连 · 回房间 · 领奖励</span><span class="tag">Windows + Mac</span></div>
+        <div class="btns" id="get">
+          <a class="btn pri" href="https://gitee.com/leexkun/lol-helper/releases/download/v2.1.0/xiaobai-helper-windows.zip">下载 Windows 版</a>
+          <a class="btn pri" href="https://gitee.com/leexkun/lol-helper/releases/download/v2.1.0/xiaobai-helper-mac.zip">下载 Mac 版</a>
+          <a class="btn gho" href="https://gitee.com/leexkun/lol-helper">Gitee 源码</a>
+        </div>
+      </div>
+      <div class="term" aria-label="版本">
+        <div class="bar"><i></i><i></i><i></i>xiaobai@helper: ~/lol-helper<span class="clock" id="clock">--:--:--</span></div>
+        <pre><span class="p">$</span> <span class="k">cat VERSION</span>
+<span class="v">Windows v2.1.0 · Mac v0.8.0 · 2026-10-27</span>
+<span class="p">$</span> <span class="k">cat HOST</span>
+<span class="v">安装包：gitee.com/leexkun/lol-helper</span>
+<span class="p">$</span> <span class="k">cat API</span>
+<span class="v">本机官方 LCU · 不注入 / 不读内存 / 不模拟键鼠 / 不 OCR</span>
+<span class="p">$</span> <span class="k">cat LICENSE</span>
+<span class="v">MIT</span><span class="cursor" aria-hidden="true"></span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="sec" id="ui">
+  <div class="wrap">
+    <div class="sh"><span class="idx">01 //</span><h2>真机界面，<span>现在这版</span></h2><span class="desc">SCREENSHOTS</span></div>
+    <div class="stack">
+      <figure class="media">
+        <img src="cover.png" alt="左边是 Windows 上的 xiaobai助手，备战席有十个英雄头像。右边是 Mac 窗口贴在客户端右侧。" width="1400" height="788">
+        <figcaption>Windows 这张图较早，顶栏里的海克斯图鉴已经从当前版本去掉。Mac 窗口贴在客户端右侧。</figcaption>
+      </figure>
+      <div class="grid g2">
+        <figure class="media">
+          <img src="ui-mac.png" alt="Mac 版窗口吸附在英雄联盟客户端右侧" width="1200" height="750">
+          <figcaption>Mac：贴在客户端右侧。Windows 设置：重连、对局中隐藏、吸附右上角、托盘和开机自启。</figcaption>
+        </figure>
+        <figure class="media">
+          <img src="ui-settings.png" alt="Windows 设置：重连、对局隐藏、吸附、托盘和开机自启" width="640" height="400">
+          <figcaption>Windows 设置：重连、对局中隐藏、吸附右上角、托盘和开机自启。</figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="sec" id="features">
+  <div class="wrap">
+    <div class="sh"><span class="idx">02 //</span><h2>两边都有的，<span>和只一边有的</span></h2><span class="desc">FEATURES</span></div>
+    <div class="grid g3">
+      <article class="card" style="--ac:var(--cy)"><div class="bd"><div class="cat">BOTH</div><h3>对局流程</h3><p>自动接受，自动开始匹配，掉线重连，结算后回到房间，并领取奖励。</p></div></article>
+      <article class="card" style="--ac:var(--gr)"><div class="bd"><div class="cat">BOTH</div><h3>备战席换英雄</h3><p>选人阶段点一个头像作为目标，客户端一放行就换上。彩色可以换，灰色是没拥有、也不在周免。</p></div></article>
+      <article class="card" style="--ac:var(--vi)"><div class="bd"><div class="cat">LCU</div><h3>只走本机接口</h3><p>不注入进程，不读写内存，不模拟键鼠，不做 OCR。和 Riot、腾讯无关。</p></div></article>
+      <article class="card" style="--ac:#ffb35c"><div class="bd"><div class="cat">WINDOWS</div><h3>对局时让开</h3><p>进对局会收起并吸附到客户端右上角。还有托盘、开机自启、WeGame 一键启动。解压后用管理员运行 ARAMHelper.exe。</p></div></article>
+      <article class="card" style="--ac:var(--gr)"><div class="bd"><div class="cat">MAC</div><h3>贴在客户端右边</h3><p>Swift 原生。一键启动游戏，窗口贴在客户端右侧，不需要辅助功能权限。只支持 Apple Silicon，第一次请右键再打开。</p></div></article>
+      <article class="card" style="--ac:var(--cy)"><div class="bd"><div class="cat">MIT</div><h3>安装包在 Gitee</h3><p>Windows v2.1.0 与 Mac v0.8.0 都在 leexkun/lol-helper 的 v2.1.0 发行版里。下载不经过 GitHub。</p></div></article>
+    </div>
+  </div>
+</section>
+<section class="sec" id="howto">
+  <div class="wrap">
+    <div class="sh"><span class="idx">03 //</span><h2>三步上手</h2><span class="desc">HOW TO USE</span></div>
+    <div class="panel prose">
+      <ol class="steps">
+        <li><h3>下载解压</h3><p>Windows 取 xiaobai-helper-windows.zip，解压后用管理员运行 ARAMHelper.exe。Mac 取 xiaobai-helper-mac.zip，第一次右键，再打开。</p></li>
+        <li><h3>连上客户端</h3><p>先登录英雄联盟客户端。右上角变成已连接之后，再启动自动化。</p></li>
+        <li><h3>开打，或换英雄</h3><p>接受、开始匹配会自己走。进选人后，点备战席头像设成目标，放行就换上。</p></li>
+      </ol>
+      <div class="callout">Windows 10/11，管理员运行。Mac 只支持 Apple Silicon，未公证。两个包都在 <a href="https://gitee.com/leexkun/lol-helper/releases/tag/v2.1.0">Gitee v2.1.0</a>。</div>
+    </div>
+  </div>
+</section>
+<section class="sec" id="faq">
+  <div class="wrap">
+    <div class="sh"><span class="idx">04 //</span><h2>两个问题</h2><span class="desc">FAQ</span></div>
+    <div class="grid g2">
+      <article class="card faq"><div class="q">它动游戏文件吗？</div><div class="a"><div>不改客户端文件。它只调用本机官方 LCU 接口。第三方工具没有人能保证零风险，用之前自己看一眼游戏协议。</div></div></article>
+      <article class="card faq"><div class="q">灰色头像点了没反应？</div><div class="a"><div>灰色表示这个英雄没拥有，也不在本周免费里，客户端不允许换。头像墙只在选人阶段、备战席打开时出现。</div></div></article>
+    </div>
+  </div>
+</section>
+<section class="sec" id="cta">
+  <div class="wrap">
+    <div class="panel cta">
+      <h2>安装包只在 <span style="color:var(--cy)">Gitee</span></h2>
+      <p>Windows v2.1.0 · Mac v0.8.0 · MIT</p>
+      <div class="btns" style="justify-content:center">
+        <a class="btn pri" href="https://gitee.com/leexkun/lol-helper/releases/download/v2.1.0/xiaobai-helper-windows.zip">下载 Windows 版</a>
+        <a class="btn pri" href="https://gitee.com/leexkun/lol-helper/releases/download/v2.1.0/xiaobai-helper-mac.zip">下载 Mac 版</a>
+        <a class="btn gho" href="https://gitee.com/leexkun/lol-helper">源码</a>
+      </div>
+    </div>
+  </div>
+</section>
 </main>
 <footer>
-  <p class="wrap">自动接受、开始匹配、重连、回房间、领奖励、备战席换英雄。与 Riot Games、腾讯无关。源码也在 <a href="https://github.com/lixyd/lol-helper">GitHub</a>。</p>
+  <div class="wrap">
+    <p>源码与安装包：<a href="https://gitee.com/leexkun/lol-helper">gitee.com/leexkun/lol-helper</a></p>
+    <p class="legal">与 Riot Games、腾讯无关。请遵守游戏用户协议。</p>
+  </div>
 </footer>
+<script>
+(function(){
+  var el=document.getElementById('clock');
+  function tick(){var d=new Date();el.textContent=[d.getHours(),d.getMinutes(),d.getSeconds()].map(function(n){return String(n).padStart(2,'0')}).join(':')}
+  tick();setInterval(tick,1000);
+})();
+</script>
 </body>
 </html>
